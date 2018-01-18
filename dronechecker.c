@@ -380,7 +380,6 @@ int flightplancheck(FList **flightplan)
 	fclose(fp2);
 }
 
-// function learnt from lab 8 list_get
 int list_get1x(NList *start, int i)
 {
 	NList *cur = start;
@@ -407,7 +406,6 @@ int list_get1x(NList *start, int i)
 	}
 }
 
-// function learnt from lab 8 list_get
 int list_get1y(NList *start, int i)
 {
 	NList *cur = start;
@@ -434,7 +432,6 @@ int list_get1y(NList *start, int i)
 	}
 }
 
-// function learnt from lab 8 list_get
 int list_get1r(NList *start, int i)
 {
 	NList *cur = start;
@@ -461,7 +458,6 @@ int list_get1r(NList *start, int i)
 	}
 }
 
-// function learnt from lab 8 list_get
 int list_get2x(FList *start, int j)
 {
 	FList *cur = start;
@@ -488,7 +484,6 @@ int list_get2x(FList *start, int j)
 	}
 }
 
-// function learnt from lab 8 list_get
 int list_get2y(FList *start, int j)
 {
 	FList *cur = start;
@@ -776,7 +771,6 @@ int root(int Ax, int Ay, int Bx, int By, int Cx, int Cy, int r)
 	}
 }
 
-// function learnt from lab 8 list_free
 void list_free1(NList **start)
 {
    NList *cur = *start;
@@ -789,7 +783,6 @@ void list_free1(NList **start)
    *start = NULL;
 }
 
-// function learnt from lab 8 list_free
 void list_free2(FList **start)
 {
    FList *cur = *start;
@@ -802,7 +795,6 @@ void list_free2(FList **start)
    *start = NULL;
 }
 
-// function learnt from lab 8 list_length
 int list_length(CList *start)
 {
 
