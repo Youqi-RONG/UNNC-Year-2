@@ -1,0 +1,153 @@
+.data
+prompt1: 	.asciiz "Please input x: "
+prompt2: 	.asciiz "Please input y: "
+rs_string: 	.asciiz "The result of [(x^3) + 3(x^2)y + 3x(y^2) + 9(y^3)] is: "
+error_msg: 	.asciiz "Error! An overflow occurs in the calculation!"
+.text
+.globl main
+main:
+# prompt for input
+	la $a0, prompt1 			# prompt x
+	li $v0, 4
+	syscall
+
+	li $v0, 5 					# read input x
+	syscall
+
+	or $s0, $zero, $v0 			# save x to s0
+
+	la $a0, prompt2 			# prompt y
+	li $v0, 4
+	syscall
+
+	li $v0, 5 					# read input y
+	syscall
+
+	or $s1, $zero, $v0 			# save y to s1
+
+
+# calculation: (x^3) + 3(x^2)y + 3x(y^2) + 9(y^3) = (x+3y)[(x^2)+3(y^2)]
+	mult $s0, $s0 				# x * x
+	mflo $s2					# save x^2 to s2
+	mfhi $t1
+
+	li $t3, 3
+	mult $s1, $t3 				# 3 * y
+	mflo $s4					# save 3y to s4
+	mfhi $t2
+
+	mult $s1, $s4				# 3y * y
+	mflo $s3					# save 3(y^2) to s3
+	mfhi $t3
+
+	addu $s5, $s0, $s4			# save x+3y to s5
+	addu $s6, $s2, $s3			# save (x^2)+3(y^2) to s6
+
+	mult $s5, $s6
+	mflo $s7					# s7 move from result low
+	mfhi $t0					# t0 move from result high
+
+# overflow check
+
+# check 3y
+	beqz $s1, check_xsquare		# y == 0 goto x^2 check
+	bltz $s1, check_3y1     	# y < 0 goto 3y check1
+	bgtz $s1, check_3y2     	# y > 0 goto 3y check2
+
+check_3y1:						# y <0
+	bltz $s4, check_3y1hi    	# 3y < 0 check hi
+	bgez $s4, over_flow     	# 3y >= 0
+
+check_3y1hi:					# 3y < 0
+	beq $t2, -1, check_xplus3y1 # hi of 3y == -1
+	j over_flow
+
+check_3y2:						# y > 0
+	bgtz $s4, check_3y2hi    	# 3y > 0 check hi
+	blez $s4, over_flow     	# 3y <= 0
+
+check_3y2hi:					# 3y > 0
+	beq $t2, 0, check_xplus3y2 	# hi of 3y == 0
+	j over_flow
+
+# check x + 3y
+check_xplus3y1:					# 3y < 0
+	bgez $s0, check_xsquare 	# x >= 0
+	bltz $s0, check1_xplus3y1   # x < 0
+
+check1_xplus3y1:				# x < 0 & 3y < 0
+	bltz $s5, check_xsquare     # x + 3y < 0
+	bgez $s5, over_flow			# x + 3y >= 0 overflow
+
+check_xplus3y2:					# 3y > 0
+	blez $s0, check_xsquare     # x <= 0
+	bgtz $s0, check2_xplus3y2   # x > 0
+
+check2_xplus3y2:				# x > 0 & 3y > 0
+	bgtz $s5, check_xsquare     # x + 3y > 0
+	blez $s5, over_flow			# x + 3y <= 0
+
+# check x^2
+check_xsquare:
+	bgez $s2, check_xsquarehi	# x^2 >= 0
+	bltz $s2, over_flow			# x^2 < 0 overflow
+
+check_xsquarehi:				# x^2 >= 0
+	beq $t1, 0, check_3ysquare 	# hi of x^2 == 0
+	j over_flow
+
+# check 3(y^2)
+check_3ysquare:
+	bgez $s3, check_3ysquarehi	# 3(y^2) >= 0
+	bltz $s3, over_flow			# 3(y^2) <0 overflow
+
+check_3ysquarehi:				# 3(y^2) >= 0
+	beq $t3, 0, check_s6 		# hi of 3(y^2) == 0
+	j over_flow
+
+# check x^2 + 3(y^2)
+check_s6:
+	bgez $s6, check_result      # x^2 + 3(y^2) >= 0
+	bltz $s6, over_flow			# x^2 + 3(y^2) < 0 overflow
+	
+# check result
+check_result:
+	beqz $s5, under_flow	    # if x + 3y == 0, goto under_flow
+	bltz $s5, check_result1		# if x + 3y < 0, goto check_result1
+	bgtz $s5, check_result2		# if x + 3y > 0, goto check_result2
+	
+check_result1:					# x + 3y < 0
+	bltz $s7, check_hi1			# if the result < 0, goto under_flow
+	bgtz $s7, over_flow			# if the result > 0, goto over_flow
+
+check_hi1:						# result < 0
+	beq $t0, -1, under_flow 	# hi of result == -1
+	j over_flow
+
+check_result2:					# x + 3y > 0
+	bltz $s7, over_flow			# if the result < 0, goto over_flow
+	bgtz $s7, check_hi2			# if the result > 0, goto under_flow
+
+check_hi2:						# result > 0
+	beq $t0, 0, under_flow 		# hi of result == 0
+	j over_flow
+
+under_flow:
+	la $a0, rs_string 			# print the answer prompt 
+	li $v0, 4
+	syscall
+	
+	move $a0, $s7				# save s7 to a0
+	li $v0, 1 					# output result
+	syscall
+	j Exit
+	
+over_flow:
+	la $a0, error_msg			# print the error message
+	li $v0, 4
+	syscall
+	j Exit
+	
+Exit:
+	li $v0, 10					# exit
+	syscall
