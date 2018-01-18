@@ -1,0 +1,90 @@
+.data
+buffer1: 	.space 100 		# space to store the string
+buffer2:	.space 2		# space to store the character
+prompt1: 	.asciiz "Input a string no more than 99 characters: "
+prompt2: 	.asciiz "Input a character: "
+rs_string: 	.asciiz "Output: "
+not_found: 	.asciiz "0 (Not found)"
+newline:	.asciiz "\n"
+.text
+.globl main
+main:
+# prompt for input
+	la $a0, prompt1 		# prompt string
+	li $v0, 4
+	syscall
+	
+	la $a0, buffer1			# string address to a0
+	li $a1, 100				# string length to a1
+	li $v0, 8 				# read input string
+	syscall
+	
+	move $s0, $a0			# s0: string address
+	move $s1, $a1			# s1: string length
+	
+	la $a0, prompt2 		# prompt character
+	li $v0, 4
+	syscall
+
+	la $a0, buffer2			# character address to a0
+	li $a1, 2				# character length to a1
+	li $v0, 8 				# read input character
+	syscall
+
+	move $s2, $a0			# s2: character address
+	move $s3, $a1			# s3: character length
+	
+# if statement	
+	addi $t0, $zero, 0		# t0=0
+	la $t1, buffer1			# load base address of buffer1 into t1
+	lb $t2, ($s0)			# read the first character from the string
+	lb $t3, ($s2)			# read the character
+	
+freq:
+	beq $t2, $zero, result	# if t2==0 goto result
+	bne $t2, $t3, recursion	# if t2!=t3 goto recursion
+	addi $t0, $t0, 1		# frequency increases once
+	j recursion
+	
+recursion:
+	addi $t1, $t1, 1		# put the next character
+	lb $t2, ($t1)
+	j freq
+	
+result:
+	bne $t0, 0, output1		# if frequence != 0, goto output1
+	j output2
+	
+output1:
+	la $a0, newline
+	li $v0, 4
+	syscall
+	
+	la $a0, rs_string		# print the answer prompt
+	li $v0, 4
+	syscall
+	
+	move $a0, $t0			# a0 = frequence
+	li $v0, 1
+	syscall
+	
+	j exit
+	
+output2:
+	la $a0, newline
+	li $v0, 4
+	syscall
+	
+	la $a0, rs_string		# print the answer prompt
+	li $v0, 4
+	syscall
+	
+	la $a0, not_found		
+	li $v0, 4
+	syscall
+	
+	j exit
+	
+exit:
+	li $v0, 10
+	syscall
