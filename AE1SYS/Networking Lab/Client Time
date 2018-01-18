@@ -42,7 +42,7 @@ int main( int argc, char *argv[])
     } 
 
   // initialize the buffer content to zeros
-  memset( recvBuff, '0', sizeof( recvBuff));
+  memset( recvBuff, '\0', sizeof( recvBuff));
 
   // the following checks are very useful, with informative messages
   //  if( ( socketFD = socket( AF_INET, SOCK_STREAM, 0)) < 0)
@@ -53,7 +53,7 @@ int main( int argc, char *argv[])
     } 
 
   // again, just clear the serv_addr
-  memset( &serv_addr, '0', sizeof( serv_addr)); 
+  memset( &serv_addr, '\0', sizeof( serv_addr)); 
 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons( 5000); 
