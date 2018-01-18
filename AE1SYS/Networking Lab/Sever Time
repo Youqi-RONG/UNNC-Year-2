@@ -1,0 +1,136 @@
+/*
+  Taken from:
+  http://www.thegeekstuff.com/2011/12/c-socket-programming/
+  
+  Also check the relevant Linux Programmer's Manual:
+  http://man7.org/linux/man-pages/man7/ip.7.html
+
+  and other related manpages...
+*/
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <time.h> 
+
+
+int main( int argc, char *argv[])
+{
+  
+  // socket file descriptor to listen on
+  int socketFD = 0;
+
+  // file descriptor for the accepted connection
+  int connfd = 0;
+
+  // the maximum number of connections to accept
+  int backlog = 5;
+
+
+  /*
+    The following structure holds the internet address and the port number.
+  */
+  struct sockaddr_in serv_addr;
+
+  // We want to see who is connecting to the server, hence:
+  struct sockaddr_in client_addr;
+  socklen_t client_addr_length = sizeof( client_addr);
+  struct in_addr client_ip_addr;
+  char client_addr_str[ INET_ADDRSTRLEN]; 
+  
+  
+  // the buffer to be used for sending content to client(s)
+  char sendBuff[1025];
+  time_t ticks; 
+
+  // create a TCP socket (Note: not bound yet)
+  //  socketFD = socket( AF_INET, SOCK_STREAM, 0);
+  socketFD = socket( PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+  // some initialization
+  memset( &serv_addr, '\0', sizeof( serv_addr));
+  memset( sendBuff, '\0', sizeof( sendBuff)); 
+
+  // specify the socket type
+  serv_addr.sin_family = AF_INET; // always set to AF_INET
+  serv_addr.sin_addr.s_addr = htonl( INADDR_ANY); // means: bind to all local interfaces
+  serv_addr.sin_port = htons( 5000); // Port number
+  // Question: Why use htons?
+
+  // assign the address we just specified in serv_addr to the socket
+  // referred to by the file descriptor socketFD
+  if( bind( socketFD, (struct sockaddr*)&serv_addr, sizeof( serv_addr)) < 0){
+    perror( "bind() error ");
+    exit( EXIT_FAILURE);
+  }
+
+
+  /*
+    the following marks the socket referred to by socketFD as a
+    passive socket, that is, as a socket that will be used to
+    accept incoming connection requests using accept( see below).
+
+    The second argument (called backlog argument) in listen()
+    defines the maximum length to which the queue of pending
+    connections for socketFD may grow.  If a connection request
+    arrives when the queue is full, the client may receive an error
+    with an indication of ECONNREFUSED or, if the underlying
+    protocol supports retransmission, the request may be ignored so
+    that a later reattempt at connection succeeds.
+  */
+  listen( socketFD, backlog); 
+
+  while( 1) // repear 'forever'
+    {
+
+      // accept a new connection on a socket
+      //connfd = accept( socketFD, (struct sockaddr*)NULL, NULL);
+
+
+      // Amin: debug
+      fprintf( stdout, "Before calling accept: client_addr_length = %d\n", client_addr_length);
+      fflush( stdout);
+      
+      // accept a new connection on a socket, and save the details of the client
+      // in client_addr
+      connfd = accept( socketFD, (struct sockaddr*)&client_addr, &client_addr_length);
+
+      // Amin: debug
+      fprintf( stdout, "After calling accept: client_addr_length = %d\n", client_addr_length);
+      fflush( stdout);
+
+      // extract the IP address of the client
+      client_ip_addr = client_addr.sin_addr;
+
+      // use inet_ntop to obtain the string representation
+      inet_ntop( AF_INET, &client_ip_addr, client_addr_str, INET_ADDRSTRLEN);
+
+      // print who has connected
+      fprintf( stdout, "Accepted a connection from %s: %u\n", client_addr_str, client_addr.sin_port);
+      fflush( stdout);
+
+      // returns the time passed since the epoch of Jan 1st, 1970, in seconds
+      ticks = time( NULL);
+
+      // the ctime function turns the seconds passes since epoch to a string representation
+      snprintf( sendBuff, sizeof( sendBuff), "%.24s\r\n", ctime( &ticks));
+
+      // send the buffer content to the client
+      write( connfd, sendBuff, strlen( sendBuff)); 
+
+      // do not forget to close the connection once the task is done
+      close( connfd);
+      fprintf( stdout, "Closed the connection %d \n", connfd);
+      fflush( stdout);
+
+      // the following is a nice way of preventing the server to use all of the
+      // CPU time for itself
+      sleep( 1);
+    }
+}
