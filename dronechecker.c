@@ -1,4 +1,4 @@
-// 6522060 zy22060 Youqi RONG
+// Youqi RONG
 
 #include <stdio.h>
 #include <stdlib.h>
