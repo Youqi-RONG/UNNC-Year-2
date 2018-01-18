@@ -7,62 +7,62 @@ not_string: .asciiz "Checking result: Your string is not a palindrome."
 .globl main
 main:
 # prompt for input
-	la $a0, prompt	 					# prompt string
+	la $a0, prompt	 				# prompt string
 	li $v0, 4
 	syscall
 	
 	la $a0, buffer		
 	li $a1, 1000			
-	li $v0, 8 							# read input string
+	li $v0, 8 					# read input string
 	syscall
 	
-	la $s0, buffer						# save the string to s0
+	la $s0, buffer					# save the string to s0
 
 # Check isPalindrome
-	li $s4, 1							# counter_one
-	li $s5, 1							# counter_two
+	li $s4, 1					# counter_one
+	li $s5, 1					# counter_two
 
 	la $s7, buffer
-	lb $t1, ($s7)						# put the first character in t1
+	lb $t1, ($s7)					# put the first character in t1
 	j number_check1
 
 number_check1:
-	blt $t1, 48, next_character         # if t1 < 48, goto next character
-	bgt $t1, 57, uppercase_check1		# if t1 > 57, goto check uppercase
+	blt $t1, 48, next_character         		# if t1 < 48, goto next character
+	bgt $t1, 57, uppercase_check1			# if t1 > 57, goto check uppercase
 	j check1_finish
 
 uppercase_check1:
-	blt $t1, 65, next_character         # if t1 < 65, goto next character
-	bgt $t1, 90, lowercase_check1		# if t1 > 90, goto check lowercase
-	addi $t1, $t1, 32					# change the uppercase to lowercase
+	blt $t1, 65, next_character         		# if t1 < 65, goto next character
+	bgt $t1, 90, lowercase_check1			# if t1 > 90, goto check lowercase
+	addi $t1, $t1, 32				# change the uppercase to lowercase
 	j check1_finish
 
 lowercase_check1:
-	blt $t1, 97, next_character         # if t1 < 97, goto next character
-	bgt $t1, 122, next_character        # if t1 > 122, goto next character
+	blt $t1, 97, next_character         		# if t1 < 97, goto next character
+	bgt $t1, 122, next_character        		# if t1 > 122, goto next character
 	j check1_finish
 
 next_character:
-	addi $s7, $s7, 1					# in the string, goto the address of next character
-	addi $s4, $s4, 1					# counter_one ++
+	addi $s7, $s7, 1				# in the string, goto the address of next character
+	addi $s4, $s4, 1				# counter_one ++
 	lb $t1, ($s7)
 	j number_check1
 
 check1_finish:
 
-li $s6, 0								# int length = 0
+li $s6, 0						# int length = 0
 
 find_last:
-	lb $t2, ($s0)						# load the first character
-	beq $t2, $zero, previous_one		# if t2 == 0, goto previous one character
-	addi $s0, $s0, 1					# goto the address of next character
-	addi $s6, $s6, 1					# length ++
+	lb $t2, ($s0)					# load the first character
+	beq $t2, $zero, previous_one			# if t2 == 0, goto previous one character
+	addi $s0, $s0, 1				# goto the address of next character
+	addi $s6, $s6, 1				# length ++
 	j find_last
 
 previous_one:
-	addi $s0, $s0, -1					# goto the address of previous character
-	addi $s6, $s6, -1					# length --
-	lb $t2, ($s0)						# t2 = the last character in the string
+	addi $s0, $s0, -1				# goto the address of previous character
+	addi $s6, $s6, -1				# length --
+	lb $t2, ($s0)					# t2 = the last character in the string
 
 	# move $a0, $s6
 	# li $v0, 1
@@ -71,14 +71,14 @@ previous_one:
 	j number_check2
 
 number_check2:
-	blt $t2, 48, previous_character     # similarly
+	blt $t2, 48, previous_character     		# similarly
 	bgt $t2, 57, uppercase_check2
 	j check2_finish
 
 uppercase_check2:
 	blt $t2, 65, previous_character
 	bgt $t2, 90, lowercase_check2
-	addi $t2, $t2, 32					# change the uppercase to lowercase
+	addi $t2, $t2, 32				# change the uppercase to lowercase
 	j check2_finish
 
 lowercase_check2:
@@ -88,7 +88,7 @@ lowercase_check2:
 
 previous_character:
 	addi $s0, $s0, -1
-	addi $s5, $s5, 1					# counter_two ++
+	addi $s5, $s5, 1				# counter_two ++
 	lb $t2, ($s0)
 	j number_check2
 
@@ -99,8 +99,8 @@ Loop:
 	j next_and_previous
 
 next_and_previous:
-	addi $s7, $s7, 1					# next character and check
-	addi $s4, $s4, 1					# counter_one ++
+	addi $s7, $s7, 1				# next character and check
+	addi $s4, $s4, 1				# counter_one ++
 	lb $t1, ($s7)
 
 	j number_check3
@@ -113,7 +113,7 @@ number_check3:
 uppercase_check3:
 	blt $t1, 65, next_character3
 	bgt $t1, 90, lowercase_check3
-	addi $t1, $t1, 32					# change the uppercase to lowercase
+	addi $t1, $t1, 32				# change the uppercase to lowercase
 	j check3_finish
 
 lowercase_check3:
@@ -123,14 +123,14 @@ lowercase_check3:
 
 next_character3:
 	addi $s7, $s7, 1
-	addi $s4, $s4, 1					# counter_one ++
+	addi $s4, $s4, 1				# counter_one ++
 	lb $t1, ($s7)
 	j number_check3
 
 check3_finish:
 
-	addi $s0, $s0, -1					# previous character and check
-	addi $s5, $s5, 1					# counter_two ++
+	addi $s0, $s0, -1				# previous character and check
+	addi $s5, $s5, 1				# counter_two ++
 	lb $t2, ($s0)
 	j number_check4
 
@@ -142,7 +142,7 @@ number_check4:
 uppercase_check4:
 	blt $t2, 65, previous_character4
 	bgt $t2, 90, lowercase_check4
-	addi $t2, $t2, 32					# change the uppercase to lowercase
+	addi $t2, $t2, 32				# change the uppercase to lowercase
 	j check4_finish
 
 lowercase_check4:
@@ -152,27 +152,27 @@ lowercase_check4:
 
 previous_character4:
 	addi $s0, $s0, -1
-	addi $s5, $s5, 1					# counter_two ++
+	addi $s5, $s5, 1				# counter_two ++
 	lb $t2, ($s0)
 	j number_check4
 
 check4_finish:
 
-	add $s4, $s4, $s5					# counter_one + counter_two
+	add $s4, $s4, $s5				# counter_one + counter_two
 	bgt $s4, $s6, isoutput				# if counter_one + counter_two > length, goto isoutput
 
 	j Loop
 
 
 isoutput:
-	la $a0, is_string					# output is_string
+	la $a0, is_string				# output is_string
 	li $v0, 4
 	syscall
 	
 	j exit	
 	
 notoutput:
-	la $a0, not_string					# output not_string
+	la $a0, not_string				# output not_string
 	li $v0, 4
 	syscall
 	
