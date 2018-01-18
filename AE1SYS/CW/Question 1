@@ -9,7 +9,7 @@ main:
 	li $v0, 4
 	syscall
 
- 	li $v0, 5 				# read input
+ 	li $v0, 5 			# read input
  	syscall
 
  	move $s0 $v0			# s0 = number
@@ -20,8 +20,8 @@ main:
 # calculation1
 ge_zero:
 
-	li $s1, 0 				# sum = 0
-	li $t2, 1 				# (i) t2 = 1
+	li $s1, 0 			# sum = 0
+	li $t2, 1 			# (i) t2 = 1
 	addi $t1, $s0, 1 		# t1 = n+1
 	blt $t2, $t1, loop1		# if t2 < n + 1, goto loop1
 	j output_res			# t2 >= n + 1, output
@@ -35,8 +35,8 @@ loop1:
 # calculation2
 lt_zero:
 
-	li $s1, 0 				# sum = 0
-	li $t2, -1 				# (i) t2 = -1
+	li $s1, 0 			# sum = 0
+	li $t2, -1 			# (i) t2 = -1
 	addi $t1, $s0, -1 		# t1 = n - 1
 	bgt $t2, $t1, loop2		# if t2 > n - 1, goto loop2
 	j output_res			# t2 <= n - 1, output
@@ -53,8 +53,8 @@ output_res:
 	syscall
 
 	move $a0, $s1
-	li $v0, 1 				# output result
+	li $v0, 1 			# output result
 	syscall
 
-	li $v0, 10 				# exit
+	li $v0, 10 			# exit
 	syscall
