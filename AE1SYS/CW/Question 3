@@ -15,8 +15,8 @@ main:
 	syscall
 	
 	la $a0, buffer1			# string address to a0
-	li $a1, 100				# string length to a1
-	li $v0, 8 				# read input string
+	li $a1, 100			# string length to a1
+	li $v0, 8 			# read input string
 	syscall
 	
 	move $s0, $a0			# s0: string address
@@ -27,8 +27,8 @@ main:
 	syscall
 
 	la $a0, buffer2			# character address to a0
-	li $a1, 2				# character length to a1
-	li $v0, 8 				# read input character
+	li $a1, 2			# character length to a1
+	li $v0, 8 			# read input character
 	syscall
 
 	move $s2, $a0			# s2: character address
