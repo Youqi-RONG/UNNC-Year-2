@@ -1,0 +1,60 @@
+.data
+prompt: 	.asciiz "Please input a number n: "
+rs_string: 	.asciiz "The sum of the numbers from 0 to n: "
+.text
+.globl main
+main:
+# prompt for input
+	la $a0, prompt 			# prompt n
+	li $v0, 4
+	syscall
+
+ 	li $v0, 5 				# read input
+ 	syscall
+
+ 	move $s0 $v0			# s0 = number
+
+	bgez $s0, ge_zero		# if number >= 0
+	j lt_zero
+
+# calculation1
+ge_zero:
+
+	li $s1, 0 				# sum = 0
+	li $t2, 1 				# (i) t2 = 1
+	addi $t1, $s0, 1 		# t1 = n+1
+	blt $t2, $t1, loop1		# if t2 < n + 1, goto loop1
+	j output_res			# t2 >= n + 1, output
+
+loop1:
+	add $s1, $s1, $t2 		# sum = sum + i
+	addi $t2, $t2, 1 		# i++
+	blt $t2, $t1, loop1		# t2 < n + 1, goto loop1
+	j output_res			# t2 = n + 1, output
+
+# calculation2
+lt_zero:
+
+	li $s1, 0 				# sum = 0
+	li $t2, -1 				# (i) t2 = -1
+	addi $t1, $s0, -1 		# t1 = n - 1
+	bgt $t2, $t1, loop2		# if t2 > n - 1, goto loop2
+	j output_res			# t2 <= n - 1, output
+
+loop2:
+	add $s1, $s1, $t2 		# sum = sum + i
+	addi $t2, $t2, -1 		# i--
+	bgt $t2, $t1, loop2		# t2 > n - 1, goto loop2
+	j output_res			# t2 = n + 1, output
+
+output_res:
+	la $a0, rs_string 		# print the answer prompt
+	li $v0, 4
+	syscall
+
+	move $a0, $s1
+	li $v0, 1 				# output result
+	syscall
+
+	li $v0, 10 				# exit
+	syscall
